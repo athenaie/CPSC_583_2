@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>Cheese</h1>
+<nav><a id="this" href="index.html">Home</a></nav>
+
+<!-- load the d3.js library -->
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+// Set the dimensions of the canvas / graph
+var margin = {top: 80, right: 80, bottom: 80, left: 80},
+  width = 1000 - margin.left - margin.right,
+  height = 600 - margin.top - margin.bottom;
+
+// Parse the date / time
+var parseDate = d3.time.format("%Y").parse;
+
+// Set the ranges
+var x = d3.time.scale().range([0, width]);
+var y = d3.scale.linear().range([height, 0]);
+
+// Define the axes
+var xAxis = d3.svg.axis().scale(x)
+  .orient("bottom").ticks(10);
+
+var yAxis = d3.svg.axis().scale(y)
+  .orient("left").ticks(10);
+
+// Define the line
+var valueline = d3.svg.line()
+  .x(function(d) { return x(d.date); })
+  .y(function(d) { return y(d.weight); });
+
+// Adds the svg canvas
+var svg = d3.select("body")
+  .append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// Get the data
+d3.csv("data/cheese_overall.csv", function(error, data) {
+  data.forEach(function(d) {
+  d.date = parseDate(d.date);
+  d.weight = +d.weight;
+});
+
+// Scale the range of the data
+x.domain(d3.extent(data, function(d) { return d.date; }));
+y.domain([0, d3.max(data, function(d) { return d.weight; })]);
+
+// Add the valueline path.
+svg.append("path")
+  .attr("class", "line")
+  .attr("d", valueline(data));
+
+// Add the X Axis
+svg.append("g")
+  .attr("class", "x axis")
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis);
+
+// text label for the x axis
+svg.append("text")
+  .attr("x", width / 2 )
+  .attr("y", height + margin.bottom)
+  .style("text-anchor", "middle")
+  .text("Year");
+
+svg.append("text")
+  .attr("transform", "rotate(-90)")
+  .attr("y", 0 - margin.left)
+  .attr("x", 0 - (height / 2))
+  .attr("dy", "2em")
+  .style("text-anchor", "middle")
+  .text("Grams");
+
+// Add the Y Axis
+svg.append("g")
+  .attr("class", "y axis")
+  .call(yAxis);
+
+svg.append("text")
+  .attr("x", (width / 2))
+  .attr("y", 0 - (margin.top / 2))
+  .attr("text-anchor", "middle")
+  .style("font-size", "16px")
+  .text("Cheese");
+
+
+});
+
+</script>
+<h2> Legend (click for more detail)</h2>
+<a href="cheese_more_detail.html"><p><b style="color:blue">Cheese</b></p></a>
+</body>
+</html>
